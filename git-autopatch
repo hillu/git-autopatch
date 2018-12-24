@@ -43,7 +43,7 @@ for recipe in $recipes; do
     PATCH() { echo "$0: $recipe: No PATCH function defined." >&2 ; return 1; }
     # shellcheck source=/dev/null
     . "$recipe"
-    changes=$(git status --short | grep -s -c -v '^?? ')
+    changes=$(git status --short | grep -c -v '^?? ' || true)
     if [ "$changes" != 0 ]; then
         echo "$0: $recipe: Dirty tree. Exiting." >&2
         exit 1
