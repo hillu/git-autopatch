@@ -4,7 +4,7 @@ DETECT() {
 
 PATCH() {
     sed -i \
-        -e '/dh_install .*--fail-missing/ { s/ --fail-missing//; }' \
+        -e '/dh_install .*--fail-missing/ { s/  *--fail-missing//; }' \
         -e '/override_dh_install:/ i\
 override_dh_missing:\
 	dh_missing --fail-missing\
