@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Autopatch script for git repositories
+#
+# Copyright 2018 Hilko Bengen  <bengen@hilluzination.de>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -eu
+
+# readonly RECIPE_PATH=~/lib/git-autopatch
+readonly recipe_path=$(dirname "$0")/recipes
+recipes=
+
+if [ $# = 0 ]; then
+    recipes=$(find "$recipe_path" -name \*.sh | sort)
+else
+    for recipe in "$@"; do
+        if [ -n "$recipes" ]; then recipes="$recipes "; fi
+        if [ -e "${recipe}" ]; then
+            recipes="${recipes}${recipe}"
+        else
+            echo "$0: $recipe: recipe not found" >&2
+            exit 1
+        fi
+    done
+fi
+
+for recipe in $recipes; do
+    unset MESSAGE
+    DETECT() { echo "$0: $recipe :No DETECT function defined." >&2 ; return 1; }
+    PATCH() { echo "$0: $recipe: No PATCH function defined." >&2 ; return 1; }
+    # shellcheck source=/dev/null
+    . "$recipe"
+    changes=$(git status --short | grep -s -c -v '^?? ')
+    if [ "$changes" != 0 ]; then
+        echo "$0: $recipe: Dirty tree. Exiting." >&2
+        exit 1
+    fi
+    if ! DETECT; then
+        echo "$0: $recipe: Skipping." >&2
+        continue
+    fi
+    if ! PATCH; then
+        echo "$0: $recipe: Patch failed. Rolling back changes." >&2
+        git checkout -f
+        continue
+    fi
+    git commit -a -m "$MESSAGE"
+done
