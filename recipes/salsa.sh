@@ -8,7 +8,8 @@ PATCH() {
         -e 's,https\?://anonscm.debian.org/c\?git/collab-maint/,https://salsa.debian.org/debian/,' \
         -e 's,\(git\|https\?\)://git.debian.org/git/collab-maint/,https://salsa.debian.org/debian/,' \
         -e 's,https\?://git.debian.org/?p=collab-maint/,https://salsa.debian.org/debian/,' \
-        -e 's,^\(Vcs-Browser: .*\)\.git$,\1,' \
+        -e 's,https\?://anonscm.debian.org/?p=collab-maint/,https://salsa.debian.org/debian/,' \
+        -e 's,^\(Vcs-Browser: .*\)\.git.*$,\1,' \
         debian/control
 }
 
