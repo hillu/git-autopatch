@@ -4,7 +4,7 @@ DETECT() {
 
 PATCH() {
     sed -i -e \
-        's/dh \(.*\)--parallel/dh \1/' \
+        '/dh .*--parallel/ s/ *--parallel//' \
         debian/rules
 }
 
